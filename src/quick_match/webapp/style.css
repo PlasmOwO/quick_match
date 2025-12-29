@@ -1,0 +1,97 @@
+body { background-color: #0f1a24; }
+
+.game-block {
+    padding: 12px 0;
+}
+
+.game-separator {
+    height: 1px;
+    background-color: #263445;
+    margin: 16px 0;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.player-row.right {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.player-text { line-height: 1.1; }
+
+.name-red {
+    color: #e74c3c;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.name-blue {
+    color: #3498db;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.name-green {
+    color: #6AD27D;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.subtext {
+    color: #aaaaaa;
+    font-size: 12px;
+}
+
+.icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.icon.right {
+    margin-left: 8px;
+    margin-right: 0;
+}
+
+.bans-row {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.bans-row.right {
+    justify-content: flex-end;
+}
+
+.ban-group {
+    display: flex;
+    gap: 6px;
+}
+
+.ban-group.split {
+    margin-left: 14px;
+}
+
+.bans-row.right .ban-group.split {
+    margin-left: 0;
+    margin-right: 14px;
+}
+
+.ban-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: visible;
+}
+
+.ban-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
