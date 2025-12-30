@@ -21,19 +21,33 @@ def get_puuid(player_name : str, player_tag : str) -> str :
     return player_info["puuid"]
 
 
-def champion_id_to_name(champion_id : int) -> str :
+def champion_id_to_name(champion_id : int) -> tuple :
     """Transform id of a champion to the real name. Using ddragon data.
 
     Args:
         champion_id (int): Id of a champion
 
     Returns:
-        str: The name of the champion
+        tuple: The name of the champion and the id (name with regex)
+        Exemple : Kai'sa ; Kaisa
     """
     response = requests.get(f"https://ddragon.leagueoflegends.com/cdn/{DDRAGON_VERSION}/data/en_US/champion.json")
     champions_data = response.json()["data"]
     champion_name = next((mapping["name"] for mapping in champions_data.values() if int(mapping["key"]) == champion_id), None)
-    return champion_name
+    champion_id = next((mapping["id"] for mapping in champions_data.values() if int(mapping["key"]) == champion_id), None)
+    return (champion_name, champion_id)
+
+
+def champion_image_from_name(champion_id : str) -> str :
+    """From champion id/name (with the regex), get the image from datadragon.
+
+    Args:
+        champion_id (str): The name of the champion, without blank space or quote (Kaisa, Velkoz etc...)
+
+    Returns:
+        str: The PNG image, src link of the champion
+    """
+    return f"https://ddragon.leagueoflegends.com/cdn/{DDRAGON_VERSION}/img/champion/{champion_id}.png"
 
 def list_player_matches(puuid : str, nb_matches : int) -> list :
     """List match ID of a player puuid. Using Riot api.
@@ -52,7 +66,28 @@ def list_player_matches(puuid : str, nb_matches : int) -> list :
 def get_match_champions(match_id : str, player_puuid : str) -> dict :
     """Get champions, bans, side and win of a specific match for a player.
     Example :
-        {'blue_champions': ['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka'], 'blue_bans': ['Malphite', 'Sion', 'Qiyana', 'Rakan', 'Alistar'], 'blue_names': ['SCL Kallesyn', 'Bartholomew Kuma', 'Orcybe', 'SCL Filou', 'SCL Likii'], 'red_champions': ['Ahri', 'Gragas', 'Vi', 'Jinx', 'Blitzcrank'], 'red_bans': ['Miss Fortune', 'Mel', 'Orianna', 'Ashe', 'Xayah'], 'red_names': ['Killa', 'bvig', 'namelesss', 'Reze', 'Dsoul'], 'player_team': 'blue', 'win': True}
+        {
+        'blue_champions': {
+            "id": ['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka'],
+            "name" :['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka']
+        }
+        'blue_bans': {
+            "id": ['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka'],
+            "name" :['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka']
+        },
+        'blue_names': ['SCL Kallesyn', 'Bartholomew Kuma', 'Orcybe', 'SCL Filou', 'SCL Likii'],
+        'red_champions': {
+            "id": ['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka'],
+            "name" :['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka']
+        },
+        'red_bans': {
+            "id": ['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka'],
+            "name" :['Renekton', 'XinZhao', 'Galio', 'Velkoz', 'Soraka']
+        },
+        'red_names': ['Killa', 'bvig', 'namelesss', 'Reze', 'Dsoul'], 
+        'player_team': 'blue', 
+        'win': True
+        }
 
     Args:
         match_id (str): Id of the match
@@ -71,19 +106,27 @@ def get_match_champions(match_id : str, player_puuid : str) -> dict :
         win = match_dict["info"]["teams"][1]["win"]
     else :
         win = match_dict["info"]["teams"][0]["win"]
-
-
+    
     champions = {
-        "blue_champions" : [player["championName"] for player in match_dict["info"]["participants"][:5]],
-        "blue_bans" : [champion_id_to_name(ban["championId"]) for ban in match_dict["info"]["teams"][0]["bans"]],
+        "blue_champions" : {
+            "id" :[champion_id_to_name(player["championId"])[1] for player in match_dict["info"]["participants"][:5]],
+            "name" : [champion_id_to_name(player["championId"])[0] for player in match_dict["info"]["participants"][:5]]
+        },
+        "blue_bans" : {
+            "id" : [champion_id_to_name(ban["championId"])[1] for ban in match_dict["info"]["teams"][0]["bans"]],
+            "name" :[champion_id_to_name(ban["championId"])[0] for ban in match_dict["info"]["teams"][0]["bans"]]
+        },
         "blue_names" : [player["riotIdGameName"] for player in match_dict["info"]["participants"][:5]],
-        
-        "red_champions" : [player["championName"] for player in match_dict["info"]["participants"][5:10]],
-        "red_bans" : [champion_id_to_name(ban["championId"]) for ban in match_dict["info"]["teams"][1]["bans"]],
+        "red_champions" : {
+            "id" :[champion_id_to_name(player["championId"])[1] for player in match_dict["info"]["participants"][5:10]],
+            "name" : [champion_id_to_name(player["championId"])[0] for player in match_dict["info"]["participants"][5:10]]
+        },
+        "red_bans" : {
+            "id" : [champion_id_to_name(ban["championId"])[1] for ban in match_dict["info"]["teams"][1]["bans"]],
+            "name" :[champion_id_to_name(ban["championId"])[0] for ban in match_dict["info"]["teams"][1]["bans"]]
+        },
         "red_names" : [player["riotIdGameName"] for player in match_dict["info"]["participants"][5:10]],
-        
         "player_team": team,
-        "win" : win
+        "win" : win   
     }
     return champions
-

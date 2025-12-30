@@ -16,40 +16,13 @@ st.markdown(f"<style>{css}</style>",unsafe_allow_html=True)
 
 # -------------------- UI FUNCTIONS --------------------
 
-
-
-@st.cache_data(show_spinner=False)
-def get_champion_icon(champion: str) -> str:
-    if champion == None :
-        return ""
-    champion = champion.lower()
-
-    urls = [
-        f"https://raw.communitydragon.org/latest/game/assets/characters/{champion}/hud/{champion}_circle_0.png",
-        f"https://raw.communitydragon.org/latest/game/assets/characters/{champion}/hud/{champion}_circle.png",
-        f"https://raw.communitydragon.org/latest/game/assets/characters/{champion}/hud/{champion}_circle_0.{champion}.png",
-        f"https://raw.communitydragon.org/latest/game/assets/characters/{champion}/hud/{champion}_circle_0.domina.png",
-        f"https://raw.communitydragon.org/latest/game/assets/characters/{champion}/hud/{champion}_circle_1.png",
-    ]
-
-    for url in urls:
-        try:
-            r = requests.head(url, timeout=1)
-            if r.status_code == 200:
-                return url
-        except requests.RequestException:
-            pass
-
-    # fallback ultime (icône par défaut ou placeholder)
-    return champion
-
 def get_name_class(player_name: str, searched_player: str, default_class: str) -> str:
     if player_name.lower() == searched_player.lower():
         return "name-green"
     return default_class
     
-def player_left(name, champion, searched_player):
-    src = get_champion_icon(champion)
+def player_left(name, champion_name, champion_id, searched_player):
+    src = api_functions.champion_image_from_name(champion_id)
     name_class = get_name_class(name, searched_player, "name-blue")
 
     st.markdown(f"""
@@ -57,20 +30,20 @@ def player_left(name, champion, searched_player):
         <img class="icon" src={src}>
         <div class="player-text">
             <div class="{name_class}">{name}</div>
-            <div class="subtext">{champion}</div>
+            <div class="subtext">{champion_name}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-def player_right(name,champion, searched_player):
-    src = get_champion_icon(champion)
+def player_right(name,champion_name, champion_id, searched_player):
+    src = api_functions.champion_image_from_name(champion_id)
     name_class = get_name_class(name, searched_player, "name-red")
 
     st.markdown(f"""
     <div class="player-row right">
         <div class="player-text">
             <div class="{name_class}">{name}</div>
-            <div class="subtext">{champion}</div>
+            <div class="subtext">{champion_name}</div>
         </div>
         <img class="icon right" src={src}>
     </div>
@@ -78,34 +51,34 @@ def player_right(name,champion, searched_player):
     
     
 def bans_left(data):
-    bans = data["blue_bans"]
+    bans = data["blue_bans"]["id"]
     st.markdown(f"""
     <div class="bans-row">
         <div class="ban-group">
-            <div class="ban-circle"><img src={get_champion_icon(bans[0])}></div>
-            <div class="ban-circle"><img src={get_champion_icon(bans[1])}></div>
-            <div class="ban-circle"><img src={get_champion_icon(bans[2])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[0])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[1])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[2])}></div>
         </div>
         <div class="ban-group split">
-            <div class="ban-circle"><img src={get_champion_icon(bans[3])}></div>
-            <div class="ban-circle"><img src={get_champion_icon(bans[4])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[3])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[4])}></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     
 def bans_right(data):
-    bans = data["red_bans"]
+    bans = data["red_bans"]["id"]
     st.markdown(f"""
     <div class="bans-row right">
         <div class="ban-group split">
-            <div class="ban-circle"><img src={get_champion_icon(bans[4])}></div>
-            <div class="ban-circle"><img src={get_champion_icon(bans[3])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[4])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[3])}></div>
         </div>
         <div class="ban-group">
-            <div class="ban-circle"><img src={get_champion_icon(bans[2])}></div>
-            <div class="ban-circle"><img src={get_champion_icon(bans[1])}></div>
-            <div class="ban-circle"><img src={get_champion_icon(bans[0])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[2])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[1])}></div>
+            <div class="ban-circle"><img src={api_functions.champion_image_from_name(bans[0])}></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -138,13 +111,21 @@ if submit :
         left_col, right_col = st.columns(2)
         
         with left_col:
-            for player in range(5) :
-                player_left(f"{match_summary["blue_names"][player]}",champion=match_summary["blue_champions"][player], searched_player=summoner_name)
+            for name, champ_name, champ_id in zip(
+                match_summary["blue_names"],
+                match_summary["blue_champions"]["name"],
+                match_summary["blue_champions"]["id"]
+            ):
+                player_left(name=name,champion_name = champ_name, champion_id = champ_id, searched_player=summoner_name)
             bans_left(match_summary)
                 
         with right_col:
-            for player in range(5) :
-                player_right(f"{match_summary["red_names"][player]}", champion=match_summary["red_champions"][player],searched_player=summoner_name)
+            for name, champ_name, champ_id in zip(
+                match_summary["red_names"],
+                match_summary["red_champions"]["name"],
+                match_summary["red_champions"]["id"]
+            ):
+                player_right(name=name,champion_name = champ_name, champion_id = champ_id, searched_player=summoner_name)
             bans_right(match_summary)
         st.markdown("</div>", unsafe_allow_html=True)  
         st.markdown("<div class='game-separator'></div>", unsafe_allow_html=True)
