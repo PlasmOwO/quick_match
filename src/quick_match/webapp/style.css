@@ -95,3 +95,20 @@ body { background-color: #0f1a24; }
     object-fit: contain;
     display: block;
 }
+
+.game-result {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+}
+
+.game-result.victory {
+    color: #A3C2A9;
+}
+
+.game-result.defeat {
+    color: #C2A3BC;
+}

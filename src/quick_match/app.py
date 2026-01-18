@@ -83,6 +83,12 @@ def bans_right(data):
     </div>
     """, unsafe_allow_html=True)
 
+def result_ui(win : bool):
+    if win :
+        return "Victory", "victory"
+    else :
+        return "Defeat", "defeat"
+
 
 # -------------------- LAYOUT --------------------
 
@@ -107,7 +113,10 @@ if submit :
     
     for match_id in list_matches :
         match_summary = api_functions.get_match_champions(match_id=match_id, player_puuid=puuid_player)
+        match_result = result_ui(match_summary["win"])
+
         st.markdown(f"<div class='game-block'>", unsafe_allow_html=True)
+        st.markdown(f"""<div class="game-result {match_result[1]}">{match_result[0]}</div>""", unsafe_allow_html=True)
         left_col, right_col = st.columns(2)
         
         with left_col:
