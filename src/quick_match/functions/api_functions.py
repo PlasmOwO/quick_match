@@ -63,7 +63,22 @@ def list_player_matches(puuid : str, nb_matches : int) -> list :
     match_list = response.json()
     return match_list
 
-def get_match_champions(match_id : str, player_puuid : str) -> dict :
+
+
+def request_match_data(match_id : str) -> dict :
+    """Request game data using Riot API
+
+    Args:
+        match_id (str): Id of the match
+
+    Returns:
+        dict: Data of the match
+    """
+    response = requests.get(f"https://europe.api.riotgames.com/lol/match/v5/matches/{match_id}?api_key={RIOT_API_KEY}")
+    return response.json()
+
+
+def get_match_champions(game_data : dict , player_puuid : str) -> dict :
     """Get champions, bans, side and win of a specific match for a player.
     Example :
         {
@@ -90,14 +105,13 @@ def get_match_champions(match_id : str, player_puuid : str) -> dict :
         }
 
     Args:
-        match_id (str): Id of the match
+        game_data (dict): Data of the match
         player_puuid (str): Player puuid. Usage for finding the team of the player.
 
     Returns:
         dict: Quick summary about the match.
     """
-    response = requests.get(f"https://europe.api.riotgames.com/lol/match/v5/matches/{match_id}?api_key={RIOT_API_KEY}")
-    match_dict = response.json()
+    match_dict = game_data
     team = "red"
     if match_dict["metadata"]["participants"].index(player_puuid) <= 4 :
         team = "blue"
@@ -130,3 +144,54 @@ def get_match_champions(match_id : str, player_puuid : str) -> dict :
         "win" : win   
     }
     return champions
+
+
+def compute_gold_percent_by_player(game_data : dict) -> dict :
+    """Retrieve gold percent per player (Player gold / team gold)
+
+    Args:
+        game_data (dict): The data of a match
+
+    Returns:
+        dict: Dict containing 2 lists (blue and red gold ratio)
+    """
+
+    total_gold_blue = sum(participant["goldEarned"] for participant in game_data["info"]["participants"][0:5])
+    total_gold_red = sum(participant["goldEarned"] for participant in game_data["info"]["participants"][5:10])
+    blue_gold_percentages = [None] *5
+    red_gold_percentages = [None] *5
+    for idx, participant in enumerate(game_data["info"]["participants"][0:5]):
+        blue_gold_percentages[idx] = participant["goldEarned"] / total_gold_blue * 100
+
+    for idx, participant in enumerate(game_data["info"]["participants"][5:10]):
+        red_gold_percentages[idx] = participant["goldEarned"] / total_gold_red * 100
+
+    return {
+        "blue_gold_percentages": blue_gold_percentages,
+        "red_gold_percentages": red_gold_percentages
+        }
+
+def compute_dmg_ratio_by_player(game_data : dict) -> dict :
+    """Retrieve damage percent per player (Player damage / team damage)
+
+    Args:
+        game_data (dict): The data of a match
+
+    Returns:
+        dict: Dict containing 2 lists (blue and red damage ratio)
+    """
+
+    total_dmg_blue = sum(participant["totalDamageDealtToChampions"] for participant in game_data["info"]["participants"][0:5])
+    total_dmg_red = sum(participant["totalDamageDealtToChampions"] for participant in game_data["info"]["participants"][5:10])
+    blue_dmg_percentages = [None] *5
+    red_dmg_percentages = [None] *5
+    for idx, participant in enumerate(game_data["info"]["participants"][0:5]):
+        blue_dmg_percentages[idx] = participant["totalDamageDealtToChampions"] / total_dmg_blue * 100
+
+    for idx, participant in enumerate(game_data["info"]["participants"][5:10]):
+        red_dmg_percentages[idx] = participant["totalDamageDealtToChampions"] / total_dmg_red * 100
+
+    return {
+        "blue_dmg_percentages": blue_dmg_percentages,
+        "red_dmg_percentages": red_dmg_percentages
+        }

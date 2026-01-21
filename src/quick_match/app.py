@@ -112,7 +112,8 @@ if submit :
     list_matches = api_functions.list_player_matches(puuid=puuid_player,nb_matches= game_nb_get)
     
     for match_id in list_matches :
-        match_summary = api_functions.get_match_champions(match_id=match_id, player_puuid=puuid_player)
+        match_data = api_functions.request_match_data(match_id=match_id)
+        match_summary = api_functions.get_match_champions(game_data=match_data, player_puuid=puuid_player)
         match_result = result_ui(match_summary["win"])
 
         st.markdown(f"<div class='game-block'>", unsafe_allow_html=True)
