@@ -140,7 +140,7 @@ if submit :
         st.markdown(f"""<div class="game-result {match_result[1]}">{match_result[0]}</div>""", unsafe_allow_html=True)
 
         ###Columns
-        cols = st.columns(6)
+        cols = st.columns([2,1,1,1,1,2])
         
         with cols[0]:
             for name, champ_name, champ_id in zip(
