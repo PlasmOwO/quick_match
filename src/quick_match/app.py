@@ -112,8 +112,12 @@ if submit :
     list_matches = api_functions.list_player_matches(puuid=puuid_player,nb_matches= game_nb_get)
     
     for match_id in list_matches :
+
+        
         match_data = api_functions.request_match_data(match_id=match_id)
         match_summary = api_functions.get_match_champions(game_data=match_data, player_puuid=puuid_player)
+        gold_ratios = api_functions.compute_gold_percent_by_player(match_data)
+        dmg_ratios = api_functions.compute_dmg_ratio_by_player(match_data)
         match_result = result_ui(match_summary["win"])
 
         st.markdown(f"<div class='game-block'>", unsafe_allow_html=True)
@@ -139,5 +143,6 @@ if submit :
             bans_right(match_summary)
         st.markdown("</div>", unsafe_allow_html=True)  
         st.markdown("<div class='game-separator'></div>", unsafe_allow_html=True)
+
 
 # -------------
