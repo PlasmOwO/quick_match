@@ -139,6 +139,20 @@ if submit :
         st.markdown(f"<div class='game-block'>", unsafe_allow_html=True)
         st.markdown(f"""<div class="game-result {match_result[1]}">{match_result[0]}</div>""", unsafe_allow_html=True)
 
+
+        # Headers row
+        header_cols = st.columns([2,1,1,1,1,2])
+
+        with header_cols[1]:
+            st.markdown('<div class="stats-header">GOLD %</div>', unsafe_allow_html=True)
+        with header_cols[2]:
+            st.markdown('<div class="stats-header">DMG %</div>', unsafe_allow_html=True)
+        with header_cols[3]:
+            st.markdown('<div class="stats-header">DMG %</div>', unsafe_allow_html=True)
+        with header_cols[4]:
+            st.markdown('<div class="stats-header">GOLD %</div>', unsafe_allow_html=True)
+
+            
         ###Columns
         cols = st.columns([2,1,1,1,1,2])
         
