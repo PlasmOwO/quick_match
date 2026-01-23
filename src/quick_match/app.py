@@ -26,7 +26,7 @@ def player_left(name, champion_name, champion_id, searched_player):
     name_class = get_name_class(name, searched_player, "name-blue")
 
     st.markdown(f"""
-    <div class="player-row">
+    <div class="player-row left">
         <img class="icon" src={src}>
         <div class="player-text">
             <div class="{name_class}">{name}</div>
@@ -83,6 +83,22 @@ def bans_right(data):
     </div>
     """, unsafe_allow_html=True)
 
+def display_stats(stat, team : str):
+    if team == "red" :
+        st.markdown(f"""
+            <div class="player-row right">
+            <div class="stats-text">{stat:.2f}</div>
+            </div>
+            """, unsafe_allow_html=True
+            )
+    else :
+        st.markdown(f"""
+            <div class="player-row">
+            <div class="stats-text">{stat:.2f}</div>
+            </div>
+            """, unsafe_allow_html=True
+            )
+
 def result_ui(win : bool):
     if win :
         return "Victory", "victory"
@@ -122,9 +138,11 @@ if submit :
 
         st.markdown(f"<div class='game-block'>", unsafe_allow_html=True)
         st.markdown(f"""<div class="game-result {match_result[1]}">{match_result[0]}</div>""", unsafe_allow_html=True)
-        left_col, right_col = st.columns(2)
+
+        ###Columns
+        cols = st.columns(6)
         
-        with left_col:
+        with cols[0]:
             for name, champ_name, champ_id in zip(
                 match_summary["blue_names"],
                 match_summary["blue_champions"]["name"],
@@ -133,7 +151,7 @@ if submit :
                 player_left(name=name,champion_name = champ_name, champion_id = champ_id, searched_player=summoner_name)
             bans_left(match_summary)
                 
-        with right_col:
+        with cols[5]:
             for name, champ_name, champ_id in zip(
                 match_summary["red_names"],
                 match_summary["red_champions"]["name"],
@@ -141,6 +159,24 @@ if submit :
             ):
                 player_right(name=name,champion_name = champ_name, champion_id = champ_id, searched_player=summoner_name)
             bans_right(match_summary)
+
+        with cols[1]:
+            for gold in gold_ratios["blue_gold_percentages"]:
+                st.markdown(f"")
+                display_stats(gold,team="blue")
+        with cols[2]:
+            for dmg in dmg_ratios["blue_dmg_percentages"]:
+                st.markdown(f"")
+                display_stats(dmg,team="blue")
+        with cols[3]:
+            for dmg in dmg_ratios["red_dmg_percentages"]:
+                st.markdown(f"")
+                display_stats(dmg,team="red")
+        with cols[4]:
+            for gold in gold_ratios["red_gold_percentages"]:
+                st.markdown(f"")
+                display_stats(gold,team="red")
+
         st.markdown("</div>", unsafe_allow_html=True)  
         st.markdown("<div class='game-separator'></div>", unsafe_allow_html=True)
 
