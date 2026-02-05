@@ -108,6 +108,9 @@ async function handleSubmit(e) {
   }))
   
   matches_data.value = allMatchesData
+  console.log(matches_data.value)
+  console.log(Math.max(...matches_data.value[0].dmg?.blue_dmg_percentages))
+
 }
 //flex content-center items-center justify-center
 </script>
@@ -167,22 +170,41 @@ async function handleSubmit(e) {
 
           <!-- CENTER: Stats -->
           <div class="flex flex-col gap-6">
-            <!-- Headers -->
-            <div class="grid grid-cols-4 gap-4 text-center border-b border-gray-600 pb-4">
-              <div class="text-gray-400 text-sm font-semibold">GOLD %</div>
-              <div class="text-gray-400 text-sm font-semibold">DMG %</div>
-              <div class="text-gray-400 text-sm font-semibold">DMG %</div>
-              <div class="text-gray-400 text-sm font-semibold">GOLD %</div>
+          <!-- Headers -->
+          <div class="grid grid-cols-4 gap-4 text-center border-b border-gray-600 pb-4">
+            <div class="text-gray-400 text-sm font-semibold">GOLD %</div>
+            <div class="text-gray-400 text-sm font-semibold">DMG %</div>
+            <div class="text-gray-400 text-sm font-semibold">DMG %</div>
+            <div class="text-gray-400 text-sm font-semibold">GOLD %</div>
+          </div>
+
+          <!-- Player Stats for BLUE team -->
+          <div
+            v-for="(dmg, pIndex) in match.dmg?.blue_dmg_percentages || []"
+            :key="`blue-stats-${pIndex}`"
+            class="grid grid-cols-4 gap-4 text-center items-center"
+          >
+            <!-- Gold % blue -->
+            <div  :class="Math.max(...match.gold?.blue_gold_percentages) == match.gold?.blue_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
+              {{ match.gold?.blue_gold_percentages?.[pIndex]?.toFixed(2) || '0' }}
             </div>
 
-            <!-- Player Stats -->
-            <div v-for="(player, pIndex) in match.details?.blue_team || []" :key="`blue-stats-${pIndex}`" class="grid grid-cols-4 gap-4 text-center items-center">
-              <div class="text-white font-bold">{{ match.gold?.[pIndex]?.toFixed(2) || '0' }}</div>
-              <div class="text-white font-bold">{{ match.dmg?.[pIndex]?.toFixed(2) || '0' }}</div>
-              <div class="text-white font-bold">{{ match.dmg?.[(pIndex + 5) % 10]?.toFixed(2) || '0' }}</div>
-              <div class="text-white font-bold">{{ match.gold?.[(pIndex + 5) % 10]?.toFixed(2) || '0' }}</div>
+            <!-- Dmg % blue -->
+            <div :class="Math.max(...match.dmg?.blue_dmg_percentages) == dmg ? 'text-amber-300 font-bold' : 'text-white'">
+              {{ dmg?.toFixed(2) || '0' }}
+            </div>
+
+            <!-- Dmg % red -->
+            <div :class="Math.max(...match.dmg?.red_dmg_percentages) == match.dmg?.red_dmg_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
+              {{ match.dmg?.red_dmg_percentages?.[pIndex]?.toFixed(2) || '0' }}
+            </div>
+
+            <!-- Gold % red -->
+            <div :class="Math.max(...match.gold?.red_gold_percentages) == match.gold?.red_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
+              {{ match.gold?.red_gold_percentages?.[pIndex]?.toFixed(2) || '0' }}
             </div>
           </div>
+        </div>
 
           <!-- RIGHT SIDE: Red Team (Mirrored) -->
           <div class="flex flex-col gap-6">
@@ -194,7 +216,7 @@ async function handleSubmit(e) {
 
               <div class="flex items-center gap-3 flex-1 justify-end">
                 <div class="flex flex-col text-right">
-                  <span class="text-red-400 font-semibold">{{ match.details?.red_names[pIndex] }}</span>
+                  <span class="font-semibold" :class="match.details.red_names[pIndex] === player_name ? 'text-green-300' : 'text-red-400'">{{ match.details?.red_names[pIndex] }}</span>
                   <span class="text-gray-400 text-sm">{{ championName }}</span>
                 </div>
                 <div class="w-12 h-12 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-xs">
