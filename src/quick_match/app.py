@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import streamlit as st
-from quick_match.functions import api_functions
+from quick_match.api import api_functions
 import requests
 from importlib.resources import open_text
 import datetime
