@@ -65,7 +65,7 @@ export async function listPlayerMatches(puuid, nbMatches, startTimestamp=null, e
   const res = await fetch(`/.netlify/functions/riot-matches?${params.toString()}`);
   console.log(res);
   const json_data = await res.json();
-  return json_data.data; 
+  return json_data; 
 }
 
 // --------------------
@@ -75,7 +75,7 @@ export async function requestMatchData(matchId) {
   const res = await fetch(`/.netlify/functions/riot-match-data?match_id=${matchId}`);
   console.log(res);
   const json_data = await res.json();
-  return json_data.data;
+  return json_data;
 }
 
 // --------------------
