@@ -3,6 +3,13 @@ export async function handler(event) {
   const { puuid, nb_matches, start_timestamp, end_timestamp } = event.queryStringParameters;
   const RIOT_API_KEY = process.env.RIOT_API_KEY;
 
+  if (!RIOT_API_KEY) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "RIOT_API_KEY missing" })
+      }
+  }
+
   const params = new URLSearchParams({ type: "tourney", start: 0, count: nb_matches });
   if (start_timestamp) params.append("startTime", start_timestamp);
   if (end_timestamp) params.append("endTime", end_timestamp);
