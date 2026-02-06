@@ -11,13 +11,14 @@ export async function handler(event) {
     }
 
   const res = await fetch(
-    `https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${player_name}/${player_tag}`,
+  `https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(player_name)}/${encodeURIComponent(player_tag)}`,
     { headers: { "X-Riot-Token": RIOT_API_KEY } }
   );
   const data = await res.json();
-
+  // console.log("TEST")
+  // console.log(data)
   return {
     statusCode: 200,
-    body: JSON.stringify({"puuid" : data.puuid})
+    body: JSON.stringify({"puuid" : data["puuid"]})
   };
 }
