@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite src/vue --config src/vue/vite.config.js",
-    "build": "vite build --config src/vue/vite.config.js --root src/vue",
-    "preview": "vite preview --config src/vue/vite.config.js --root src/vue"
+    "build": "vite build src/vue --config src/vue/vite.config.js",
+    "preview": "vite preview src/vue --config src/vue/vite.config.js"
   },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
