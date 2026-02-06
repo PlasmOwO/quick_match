@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import DatePicker from 'primevue/datepicker';
 
 const player_name = ref('')
@@ -8,7 +8,33 @@ const player_puuid = ref('')
 const list_matches = ref([])
 const number_of_game = ref(5)
 const matches_data = ref([])
+const start_timestamp = ref(null)
+const end_timestamp = ref(null)
 
+
+
+//DATE TO TIMESTAMP
+// const icondisplay = ref(null)
+
+// watch(icondisplay, (newValue) => {
+//   if (!newValue || newValue.length === 0) {
+//     start_timestamp.value = null
+//     end_timestamp.value = null
+//     return
+//   }
+
+//   const [startDate, endDate] = newValue
+
+//   start_timestamp.value = startDate
+//     ? Math.floor(startDate.getTime() / 1000)
+//     : null
+
+//   end_timestamp.value = endDate
+//     ? Math.floor(endDate.getTime() / 1000)
+//     : null
+// })
+
+///
 async function get_puuid()
 {
   const response = await fetch(`http://127.0.0.1:8000/puuid?player_name=${player_name.value}&player_tag=${player_tag.value}`)
@@ -16,9 +42,24 @@ async function get_puuid()
   player_puuid.value = data
 }
 
-async function get_matches()
-{
-  const response = await fetch(`http://127.0.0.1:8000/list_player_matches?puuid=${player_puuid.value}&nb_matches=${number_of_game.value}`)
+async function get_matches() {
+  const params = new URLSearchParams({
+    puuid: player_puuid.value,
+    nb_matches: number_of_game.value,
+  })
+
+  if (start_timestamp.value) {
+    params.append('start_timestamp', start_timestamp.value)
+  }
+
+  if (end_timestamp.value) {
+    params.append('end_timestamp', end_timestamp.value)
+  }
+
+  const response = await fetch(
+    `http://127.0.0.1:8000/list_player_matches?${params.toString()}`
+  )
+
   const data = await response.json()
   list_matches.value = data
 }
@@ -114,6 +155,8 @@ async function handleSubmit(e) {
 </script>
 
 <template>
+  {{ start_timestamp }}
+  {{ end_timestamp }}
   <section class="bg-gray-900 min-h-screen text-white flex items-center justify-center">
     <div class="container flex flex-col gap-4 max-w-1/2 m-auto py-6">
       <h1 class="text-center font-sans text-4xl font-bold">Quick Match</h1>
