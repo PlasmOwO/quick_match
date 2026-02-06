@@ -1,6 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import DatePicker from 'primevue/datepicker';
+import { getPuuid, listPlayerMatches, requestMatchData, initDDragonVersion, championIdToName, championImageFromName, getMatchChampions, computeGoldPercentByPlayer, computeDmgRatioByPlayer} from './utils/scripts.js'
+
+
 
 const player_name = ref('')
 const player_tag = ref('')
@@ -11,6 +14,16 @@ const matches_data = ref([])
 const start_timestamp = ref(null)
 const end_timestamp = ref(null)
 
+const ddragonVersion = ref('') 
+
+async function loadDDragonVersion() {
+  const version = await initDDragonVersion()
+  ddragonVersion.value = version
+  console.log("DDragon version loaded:", ddragonVersion.value)
+}
+
+// Appel direct
+loadDDragonVersion()
 
 
 //DATE TO TIMESTAMP
@@ -35,128 +48,91 @@ const end_timestamp = ref(null)
 // })
 
 ///
-async function get_puuid()
-{
-  const response = await fetch(`http://127.0.0.1:8000/puuid?player_name=${player_name.value}&player_tag=${player_tag.value}`)
-  const data = await response.json()
-  player_puuid.value = data
+// ----------------------------
+// Remplace get_puuid
+// ----------------------------
+async function get_puuid(player_name, player_tag) {
+  player_puuid.value = await getPuuid(player_name, player_tag)
 }
 
-async function get_matches() {
-  const params = new URLSearchParams({
-    puuid: player_puuid.value,
-    nb_matches: number_of_game.value,
-  })
-
-  if (start_timestamp.value) {
-    params.append('start_timestamp', start_timestamp.value)
+// ----------------------------
+// Remplace get_matches
+// ----------------------------
+async function get_matches(number_of_game, start_timestamp = null, end_timestamp = null) {
+  const params = {
+    nb_matches: number_of_game,
+    start_timestamp,
+    end_timestamp
   }
-
-  if (end_timestamp.value) {
-    params.append('end_timestamp', end_timestamp.value)
-  }
-
-  const response = await fetch(
-    `http://127.0.0.1:8000/list_player_matches?${params.toString()}`
-  )
-
-  const data = await response.json()
-  list_matches.value = data
+  list_matches.value = await listPlayerMatches(player_puuid.value, number_of_game, start_timestamp, end_timestamp)
 }
 
-
-async function get_match_details(match_data)
-{
-  const response = await fetch(`http://127.0.0.1:8000/match_details?player_puuid=${player_puuid.value}`,
-    {
-      method: 'POST',
-      headers : {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({game_data : match_data})
-    }
-  )
-  const data = await response.json()
-  return data
+// ----------------------------
+// Remplace get_match_details
+// ----------------------------
+async function get_match_details(match_data) {
+  return getMatchChampions(match_data, player_puuid.value)
 }
 
-async function get_gold_percent_player(match_data)
-{
-  const response = await fetch(`http://127.0.0.1:8000/gold_percent_player/`,
-    {
-      method: 'POST',
-      headers : {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({game_data : match_data})
-    }
-  )
-
-  return await response.json()
+// ----------------------------
+// Remplace get_gold_percent_player
+// ----------------------------
+async function get_gold_percent_player(match_data) {
+  return computeGoldPercentByPlayer(match_data)
 }
 
-async function get_dmg_percent_player(match_data)
-{
-  const response = await fetch(`http://127.0.0.1:8000/dmg_percent_player/`,
-    {
-      method: 'POST',
-      headers : {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({game_data : match_data})
-    }
-  )
-
-  return await response.json()
+// ----------------------------
+// Remplace get_dmg_percent_player
+// ----------------------------
+async function get_dmg_percent_player(match_data) {
+  return computeDmgRatioByPlayer(match_data)
 }
 
-//Fonction that retrieve data only one time and call function to get specific fields
-async function get_match_data()
-{
+// ----------------------------
+// Remplace get_match_data
+// ----------------------------
+async function get_match_data() {
   const allMatchesData = await Promise.all(
-    list_matches.value.map(async (match) =>{
-      const response = await fetch(`http://127.0.0.1:8000/match_data/${match}`)
-      const match_data = await response.json()
+    list_matches.value.map(async (match) => {
+      // On récupère directement les données du match depuis Riot
+      const match_data = await requestMatchData(match)
 
-      
       const [details, gold, dmg] = await Promise.all([
         get_match_details(match_data),
         get_gold_percent_player(match_data),
         get_dmg_percent_player(match_data)
       ])
-      return { details, gold, dmg}
+
+      return { details, gold, dmg }
     })
   )
-  console.log(allMatchesData)
+  // console.log(allMatchesData)
   return allMatchesData
 }
 
-
-
+// ----------------------------
+// Remplace handleSubmit
+// ----------------------------
 async function handleSubmit(e) {
   e.preventDefault()
-  await get_puuid()
-  await get_matches()
 
+  // On utilise directement les refs Vue
+  await get_puuid(player_name.value, player_tag.value)
+  await get_matches(number_of_game.value, start_timestamp.value, end_timestamp.value)
 
   const allMatchesData = await get_match_data()
 
-  
   // Associe les données aux matchs
   list_matches.value = list_matches.value.map((match, index) => ({
     ...match,
     ...allMatchesData[index]
   }))
-  
-  matches_data.value = allMatchesData
 
+  matches_data.value = allMatchesData
 }
-//flex content-center items-center justify-center
 </script>
 
 <template>
-  {{ start_timestamp }}
-  {{ end_timestamp }}
   <section class="bg-gray-900 min-h-screen text-white flex items-center justify-center">
     <div class="container flex flex-col gap-4 max-w-1/2 m-auto py-6">
       <h1 class="text-center font-sans text-4xl font-bold">Quick Match</h1>
@@ -193,7 +169,7 @@ async function handleSubmit(e) {
               <div class="flex items-center gap-3 flex-1">
                 <!-- Avatar -->
                 <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
-                  <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${match.details?.blue_champions?.id?.[pIndex]}.png`">
+                  <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.blue_champions?.id?.[pIndex]}.png`">
                 </div>
 
                 <!-- Texte -->
@@ -261,7 +237,7 @@ async function handleSubmit(e) {
                   <span class="text-gray-400 text-sm">{{ championName }}</span>
                 </div>
                 <div class="w-12 h-12 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-xs">
-                  <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${match.details?.red_champions?.id?.[pIndex]}.png`">
+                  <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.red_champions?.id?.[pIndex]}.png`">
                 </div>
               </div>
             
@@ -275,7 +251,7 @@ async function handleSubmit(e) {
           <!-- Left Items -->
           <div class="flex justify-start gap-2">
             <div v-for="(ban, i) in match.details?.blue_bans?.id" :key="`left-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600">
-              <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
+              <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
             </div>
           </div>
           <!-- Center spacer -->
@@ -283,7 +259,7 @@ async function handleSubmit(e) {
           <!-- Right Items -->
           <div class="flex justify-end gap-2">
             <div v-for="(ban, i) in [...(match.details?.red_bans?.id)].reverse()" :key="`right-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600">
-              <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
+              <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
             </div>
           </div>
         </div>
