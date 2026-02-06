@@ -1,5 +1,43 @@
 @import './base.css';
 @import "tailwindcss";
+@import "tailwindcss-primeui";
+
+/* PrimeVue DatePicker - Tailwind dark fix */
+/* Input du DatePicker */
+.p-datepicker input {
+  @apply bg-gray-800 text-gray-400 border-gray-600;
+}
+
+/* Placeholder */
+.p-datepicker input::placeholder {
+  @apply text-gray-400;
+}
+
+/* Focus */
+.p-datepicker:not(.p-disabled).p-focus {
+  @apply ring-2 ring-blue-500/30 border-blue-500;
+}
+
+/* Popup calendrier
+.p-datepicker-panel {
+  @apply bg-gray-800 border border-gray-700 text-gray-100;
+} */
+
+/* Header du calendrier */
+.p-datepicker-header {
+  @apply bg-gray-800 border-b border-gray-700;
+}
+
+/* Jours */
+.p-datepicker-calendar td span {
+  @apply text-gray-300 hover:bg-gray-700;
+}
+
+/* Jour sélectionné */
+.p-datepicker-calendar td span.p-highlight {
+  @apply bg-blue-600 text-white;
+}
+
 /* #app {
   max-width: 1280px;
   margin: 0 auto;

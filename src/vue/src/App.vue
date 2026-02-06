@@ -9,13 +9,6 @@ const list_matches = ref([])
 const number_of_game = ref(5)
 const matches_data = ref([])
 
-async function get_champion_image(champion_id_str)
-{
-  const response = await fetch(`http://127.0.0.1:8000/champion_image?champion_name_id=${champion_id_str}`)
-  const data = await response.json()
-  return data
-}
-
 async function get_puuid()
 {
   const response = await fetch(`http://127.0.0.1:8000/puuid?player_name=${player_name.value}&player_tag=${player_tag.value}`)
@@ -129,7 +122,7 @@ async function handleSubmit(e) {
     <form class="bg-gray-900 rounded w-full mx-auto flex flex-col gap-4"  @submit="handleSubmit">
         <input class="bg-gray-800 shadow appearance-none border-3 rounded w-full py-2 px-3 text-gray-400 leading-tight focus:outline-none focus:shadow-outline" v-model="player_name" type="text" placeholder="Summoner name">
         <input class="bg-gray-800 shadow appearance-none border-3 rounded w-full py-2 px-3 text-gray-400 leading-tight focus:outline-none focus:shadow-outline" v-model="player_tag" type="text" placeholder="Summoner tag">
-        <DatePicker class="bg-gray-800 shadow appearance-none border-3 rounded w-full py-2 px-3 text-gray-400 leading-tight focus:outline-none focus:shadow-outline" v-model="icondisplay" showIcon fluid selection-mode="range" placeholder="Select a date" />
+        <DatePicker class="bg-gray-800 shadow appearance-none border-3 rounded w-full  text-gray-400 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition" v-model="icondisplay" showIcon dark fluid selection-mode="range" placeholder="Select a date" />
         <input class="bg-gray-800 shadow appearance-none border-3 rounded w-full py-2 px-3 text-gray-400 leading-tight focus:outline-none focus:shadow-outline" v-model="number_of_game" type="number" placeholder="Number of game">
       <div class="flex flex-col items-center">
         <button type="submit" class="bg-transparent hover:bg-gray-300 hover:text-gray-800 py-2 px-4 border rounded-2xl">Search</button>
@@ -234,17 +227,21 @@ async function handleSubmit(e) {
           
         </div>
 
-        <!-- Items Section -->
+        <!-- Bans Section -->
         <div class="grid grid-cols-3 gap-8 mt-8">
           <!-- Left Items -->
           <div class="flex justify-start gap-2">
-            <div v-for="(item, i) in 5" :key="`left-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600"></div>
+            <div v-for="(ban, i) in match.details?.blue_bans?.id" :key="`left-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600">
+              <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
+            </div>
           </div>
           <!-- Center spacer -->
           <div></div>
           <!-- Right Items -->
           <div class="flex justify-end gap-2">
-            <div v-for="(item, i) in 5" :key="`right-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600"></div>
+            <div v-for="(ban, i) in [...(match.details?.red_bans?.id)].reverse()" :key="`right-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600">
+              <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
+            </div>
           </div>
         </div>
       </div>
