@@ -2,6 +2,7 @@ import pandas
 import requests
 from dotenv import load_dotenv
 import os
+from typing import Optional
 
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 DDRAGON_VERSION = requests.get("https://ddragon.leagueoflegends.com/api/versions.json").json()[0]
@@ -49,17 +50,37 @@ def champion_image_from_name(champion_id : str) -> str :
     """
     return f"https://ddragon.leagueoflegends.com/cdn/{DDRAGON_VERSION}/img/champion/{champion_id}.png"
 
-def list_player_matches(puuid : str, nb_matches : int) -> list :
+def list_player_matches(puuid : str, nb_matches : int, start_timestamp : Optional[int] = None, end_timestamp : Optional[int] = None) -> list :
     """List match ID of a player puuid. Using Riot api.
 
     Args:
         puuid (str): The Puuid of the player
         nb_matches (int): Number of matches to get
+        start_timestamp (int, Optional) : Timestamp of start in second,
+        end_timestamp (int, Optional) : Time of end in second
 
     Returns:
         list: Match IDs
     """
-    response = requests.get(f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?type=tourney&start=0&count={nb_matches}&api_key={RIOT_API_KEY}")
+    
+    params = {
+        "type": "tourney",
+        "start": 0,
+        "count": nb_matches,
+        "api_key": RIOT_API_KEY,
+    }
+
+    # Ajout conditionnel
+    if start_timestamp is not None:
+        params["startTime"] = start_timestamp
+
+    if end_timestamp is not None:
+        params["endTime"] = end_timestamp
+
+    response = requests.get(
+        f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids",
+        params=params,
+    )
     match_list = response.json()
     return match_list
 
