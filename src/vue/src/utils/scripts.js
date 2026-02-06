@@ -3,7 +3,6 @@
 import axios from "axios";
 
 // const RIOT_API_KEY = import.meta.env.VITE_RIOT_API_KEY;
-const RIOT_API_KEY = import.meta.env.VITE_RIOT_API_KEY;
 let DDRAGON_VERSION = null;
 
 // Initialise la version DDragon (async)
@@ -17,11 +16,8 @@ export async function initDDragonVersion() {
 
 // Get PUUID
 export async function getPuuid(playerName, playerTag) {
-  const res = await axios.get(
-    `https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${playerName}/${playerTag}`,
-    { headers: { "X-Riot-Token": RIOT_API_KEY } }
-  );
-  return res.data.puuid;
+  const res = await fetch(`/.netlify/functions/riot-puuid?player_name=${playerName}&player_tag=${playerTag}`);
+  return await res.json(); 
 }
 
 // --------------------
@@ -60,31 +56,20 @@ export async function championImageFromName(championId) {
 
 // List player matches
 export async function listPlayerMatches(puuid, nbMatches, startTimestamp=null, endTimestamp=null) {
-  const params = {
-    type: "tourney",
-    start: 0,
-    count: nbMatches,
-  };
-  if (startTimestamp !== null) params.startTime = startTimestamp;
-  if (endTimestamp !== null) params.endTime = endTimestamp;
+  const params = new URLSearchParams({ puuid, nb_matches: nbMatches });
+  if (startTimestamp) params.append("start_timestamp", startTimestamp);
+  if (endTimestamp) params.append("end_timestamp", endTimestamp);
 
-  const res = await axios.get(
-    `https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids`,
-    { headers: { "X-Riot-Token": RIOT_API_KEY }, params }
-  );
-
-  return res.data;
+  const res = await fetch(`/.netlify/functions/riot-matches?${params.toString()}`);
+  return await res.json(); 
 }
 
 // --------------------
 
 // Request match data
 export async function requestMatchData(matchId) {
-  const res = await axios.get(
-    `https://europe.api.riotgames.com/lol/match/v5/matches/${matchId}`,
-    { headers: { "X-Riot-Token": RIOT_API_KEY } }
-  );
-  return res.data;
+  const res = await fetch(`/.netlify/functions/riot-match-data?match_id=${matchId}`);
+  return await res.json();
 }
 
 // --------------------
