@@ -9,6 +9,13 @@ const list_matches = ref([])
 const number_of_game = ref(5)
 const matches_data = ref([])
 
+async function get_champion_image(champion_id_str)
+{
+  const response = await fetch(`http://127.0.0.1:8000/champion_image?champion_name_id=${champion_id_str}`)
+  const data = await response.json()
+  return data
+}
+
 async function get_puuid()
 {
   const response = await fetch(`http://127.0.0.1:8000/puuid?player_name=${player_name.value}&player_tag=${player_tag.value}`)
@@ -108,8 +115,6 @@ async function handleSubmit(e) {
   }))
   
   matches_data.value = allMatchesData
-  console.log(matches_data.value)
-  console.log(Math.max(...matches_data.value[0].dmg?.blue_dmg_percentages))
 
 }
 //flex content-center items-center justify-center
@@ -152,7 +157,7 @@ async function handleSubmit(e) {
               <div class="flex items-center gap-3 flex-1">
                 <!-- Avatar -->
                 <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
-                  {{ championName?.charAt(0).toUpperCase() || '?' }}
+                  <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${match.details?.blue_champions?.id?.[pIndex]}.png`">
                 </div>
 
                 <!-- Texte -->
@@ -220,7 +225,7 @@ async function handleSubmit(e) {
                   <span class="text-gray-400 text-sm">{{ championName }}</span>
                 </div>
                 <div class="w-12 h-12 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-xs">
-                  {{ championName?.charAt(0).toUpperCase() || '?' }}
+                  <img :src="`https://ddragon.leagueoflegends.com/cdn/16.3.1/img/champion/${match.details?.red_champions?.id?.[pIndex]}.png`">
                 </div>
               </div>
             
