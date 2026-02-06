@@ -18,6 +18,6 @@ export async function handler(event) {
 
   return {
     statusCode: 200,
-    body: JSON.stringify(data.puuid)
+    body: JSON.stringify({"puuid" : data.puuid})
   };
 }

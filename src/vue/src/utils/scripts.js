@@ -17,8 +17,9 @@ export async function initDDragonVersion() {
 // Get PUUID
 export async function getPuuid(playerName, playerTag) {
   const res = await fetch(`/.netlify/functions/riot-puuid?player_name=${playerName}&player_tag=${playerTag}`);
-  console.log(res)
-  return await res.json(); 
+  console.log(res);
+  const data = await res.json();
+  return data.puuid;
 }
 
 // --------------------
@@ -62,8 +63,9 @@ export async function listPlayerMatches(puuid, nbMatches, startTimestamp=null, e
   if (endTimestamp) params.append("end_timestamp", endTimestamp);
 
   const res = await fetch(`/.netlify/functions/riot-matches?${params.toString()}`);
-  console.log(res)
-  return await res.json(); 
+  console.log(res);
+  const json_data = await res.json();
+  return json_data.data; 
 }
 
 // --------------------
@@ -71,8 +73,9 @@ export async function listPlayerMatches(puuid, nbMatches, startTimestamp=null, e
 // Request match data
 export async function requestMatchData(matchId) {
   const res = await fetch(`/.netlify/functions/riot-match-data?match_id=${matchId}`);
-  console.log(res)
-  return await res.json();
+  console.log(res);
+  const json_data = await res.json();
+  return json_data.data;
 }
 
 // --------------------
