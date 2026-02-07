@@ -15,10 +15,19 @@ export async function handler(event) {
     { headers: { "X-Riot-Token": RIOT_API_KEY } }
   );
   const data = await res.json();
-  // console.log("TEST")
-  // console.log(data)
+
+  if (!res.ok || !data.puuid) {
+  return {
+    statusCode: res.status,
+    body: JSON.stringify({
+      error: "Riot API error",
+      riot_status: data.status || null
+    })
+  };
+}
+
   return {
     statusCode: 200,
-    body: JSON.stringify({"puuid" : data["puuid"]})
+    body: JSON.stringify({ puuid: data.puuid })
   };
 }
