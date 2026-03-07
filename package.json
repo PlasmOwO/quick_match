@@ -12,6 +12,7 @@
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.4",
+    "dom-to-image-more": "^3.7.2",
     "netlify-cli": "^23.15.1",
     "primevue": "^4.5.4",
     "tailwindcss": "^4.1.18",

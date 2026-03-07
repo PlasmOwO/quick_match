@@ -179,3 +179,64 @@ export function computeDmgRatioByPlayer(gameData) {
 
   return { blue_dmg_percentages: blueDmgPercentages, red_dmg_percentages: redDmgPercentages };
 }
+
+
+//get match start date
+
+export function matchDate(gameData){
+  const official_dates = {
+    "Etape-1 ; jour 1": new Date(2026,0,24),
+    "Etape-1 ; jour 2": new Date(2026,0,25),
+    "Etape-1 ; jour 3": new Date(2026,0,31),
+    "Etape-1 ; jour 4": new Date(2026,1,1),
+
+    "Etape-2 ; jour 1": new Date(2026,1,28),
+    "Etape-2 ; jour 2": new Date(2026,2,1),
+    "Etape-2 ; jour 3": new Date(2026,2,7),
+    "Etape-2 ; jour 4": new Date(2026,2,8),
+
+    "Etape-3 ; jour 1": new Date(2026,4,2),
+    "Etape-3 ; jour 2": new Date(2026,4,3),
+    "Etape-3 ; jour 3": new Date(2026,4,9),
+    "Etape-3 ; jour 4": new Date(2026,4,10),
+
+    "Etape-4 ; jour 1": new Date(2026,5,27),
+    "Etape-4 ; jour 2": new Date(2026,5,28),
+    "Etape-4 ; jour 3": new Date(2026,6,4),
+    "Etape-4 ; jour 4": new Date(2026,6,5),
+
+    "Etape-5 ; jour 1": new Date(2026,6,18),
+    "Etape-5 ; jour 2": new Date(2026,6,19),
+    "Etape-5 ; jour 3": new Date(2026,6,25),
+    "Etape-5 ; jour 4": new Date(2026,6,26),
+
+    "Etape-6 ; jour 1": new Date(2026,7,15),
+    "Etape-6 ; jour 2": new Date(2026,7,16),
+    "Etape-6 ; jour 3": new Date(2026,7,22),
+    "Etape-6 ; jour 4": new Date(2026,7,23),
+
+    "GA ; jour 1": new Date(2026,3,4),
+    "GA ; jour 2": new Date(2026,3,5),
+    "GA ; jour 3": new Date(2026,3,6),
+
+    "KOF ; jour 1": new Date(2026,4,30),
+    "KOF ; jour 2": new Date(2026,4,31),
+  }
+
+  const gameDateObj = new Date(gameData.info.gameCreation)
+  const game_date_fr = gameDateObj.toLocaleDateString("fr-FR")
+  let label = ""
+
+  for (const [key, date] of Object.entries(official_dates)) {
+    const officialDateFR = date.toLocaleDateString("fr-FR")
+    console.log(officialDateFR, game_date_fr)
+    if (officialDateFR === game_date_fr) {
+      label = key
+      console.log(date)
+      break
+    }
+  }
+
+  const result = label ? `${game_date_fr} - ${label}` : game_date_fr
+  return result
+}

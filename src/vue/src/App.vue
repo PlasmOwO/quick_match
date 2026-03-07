@@ -1,10 +1,9 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import DatePicker from 'primevue/datepicker';
-import { getPuuid, listPlayerMatches, requestMatchData, initDDragonVersion, championIdToName, championImageFromName, getMatchChampions, computeGoldPercentByPlayer, computeDmgRatioByPlayer} from './utils/scripts.js'
+import { matchDate,getPuuid, listPlayerMatches, requestMatchData, initDDragonVersion, championIdToName, championImageFromName, getMatchChampions, computeGoldPercentByPlayer, computeDmgRatioByPlayer} from './utils/scripts.js'
 import { computed } from 'vue'
-
-
+import domtoimage from 'dom-to-image-more'
 const player_name = ref('')
 const player_tag = ref('')
 const player_puuid = ref('')
@@ -35,8 +34,19 @@ async function loadDDragonVersion() {
   ddragonVersion.value = version
   console.log("DDragon version loaded:", ddragonVersion.value)
 }
+const downloadPNG = async () => {
+  const node = document.getElementById('match-data')
 
-// Appel direct
+  const dataUrl = await domtoimage.toPng(node, {
+    scale: 2,
+    bgcolor: '#111827', // bg-gray-900 exact
+  })
+
+  const link = document.createElement('a')
+  link.download = 'match-export.png'
+  link.href = dataUrl
+  link.click()
+}
 loadDDragonVersion()
 
 
@@ -103,6 +113,9 @@ async function get_dmg_percent_player(match_data) {
   return computeDmgRatioByPlayer(match_data)
 }
 
+async function get_match_date(match_data){
+  return matchDate(match_data)
+}
 // ----------------------------
 // Remplace get_match_data
 // ----------------------------
@@ -112,13 +125,14 @@ async function get_match_data() {
       // On récupère directement les données du match depuis Riot
       const match_data = await requestMatchData(match)
 
-      const [details, gold, dmg] = await Promise.all([
+      const [details, gold, dmg,date] = await Promise.all([
         get_match_details(match_data),
         get_gold_percent_player(match_data),
-        get_dmg_percent_player(match_data)
+        get_dmg_percent_player(match_data),
+        get_match_date(match_data)
       ])
 
-      return { details, gold, dmg }
+      return { details, gold, dmg , date}
     })
   )
   // console.log(allMatchesData)
@@ -156,7 +170,14 @@ async function handleSubmit(e) {
 </script>
 
 <template>
-  <section class="bg-gray-900 min-h-screen text-white flex items-center justify-center">
+  <section id="page-content" class="bg-gray-900 min-h-screen text-white flex items-center justify-center">
+    <div class="absolute top-6 right-6">
+    <button
+      @click="downloadPNG()"
+      class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600">
+      Export page
+    </button>
+  </div>
     <div class="container flex flex-col gap-4 max-w-1/2 m-auto py-6">
       <h1 class="text-center font-sans text-4xl font-bold">Quick Match</h1>
       <hr>
@@ -175,12 +196,15 @@ async function handleSubmit(e) {
     </div>
     <br>
     <!-- Matches Data Section -->
-    <div class="w-full y space-y-8" v-if="matches_data.length> 0">
+    <div id="match-data" class="w-full y space-y-8" v-if="matches_data.length> 0">
       <div v-for="(match, index) in matches_data" :key="index" class="bg-gray-900 rounded-lg p-8 border border-gray-700">
         <!-- Match Result Header -->
+        <p class="text-stone-300 font-mono">{{match?.date}}</p>
+
         <h2 class="text-3xl font-bold mb-8 text-center" :class="match.details?.win === false ? 'text-red-500' : 'text-green-500'">
           {{ match.details?.win === false ? 'Defeat' : 'Victory'}}
         </h2>
+
         
         <!-- Main Grid: Left Team | Stats | Right Team -->
         <div class="grid grid-cols-3 gap-0.1">
