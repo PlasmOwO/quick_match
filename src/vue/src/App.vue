@@ -2,7 +2,7 @@
 import { ref, watch, onMounted } from 'vue'
 import DatePicker from 'primevue/datepicker';
 import { getPuuid, listPlayerMatches, requestMatchData, initDDragonVersion, championIdToName, championImageFromName, getMatchChampions, computeGoldPercentByPlayer, computeDmgRatioByPlayer} from './utils/scripts.js'
-
+import { computed } from 'vue'
 
 
 const player_name = ref('')
@@ -11,10 +11,24 @@ const player_puuid = ref('')
 const list_matches = ref([])
 const number_of_game = ref(5)
 const matches_data = ref([])
-const start_timestamp = ref(null)
-const end_timestamp = ref(null)
-
 const ddragonVersion = ref('') 
+const icondisplay = ref(null) 
+const loading = ref(false)
+
+const timestamps = computed(() => {
+  if (!icondisplay.value || icondisplay.value.length !== 2 || icondisplay.value[1] == null){
+    return{
+      start : null,
+      end : null
+    }
+  }
+
+
+  return {
+    start: Math.floor(icondisplay.value[0].getTime() / 1000),
+    end: Math.floor(icondisplay.value[1].getTime() / 1000)
+  }
+})
 
 async function loadDDragonVersion() {
   const version = await initDDragonVersion()
@@ -64,6 +78,7 @@ async function get_matches(number_of_game, start_timestamp = null, end_timestamp
     start_timestamp,
     end_timestamp
   }
+
   list_matches.value = await listPlayerMatches(player_puuid.value, number_of_game, start_timestamp, end_timestamp)
 }
 
@@ -116,19 +131,27 @@ async function get_match_data() {
 async function handleSubmit(e) {
   e.preventDefault()
 
+  loading.value = true
+
   // On utilise directement les refs Vue
-  await get_puuid(player_name.value, player_tag.value)
-  await get_matches(number_of_game.value, start_timestamp.value, end_timestamp.value)
+  try {
+    await get_puuid(player_name.value, player_tag.value)
+    await get_matches(number_of_game.value, timestamps.value.start, timestamps.value.end)
 
-  const allMatchesData = await get_match_data()
+    const allMatchesData = await get_match_data()
 
-  // Associe les données aux matchs
-  list_matches.value = list_matches.value.map((match, index) => ({
-    ...match,
-    ...allMatchesData[index]
-  }))
+    // Associe les données aux matchs
+    list_matches.value = list_matches.value.map((match, index) => ({
+      ...match,
+      ...allMatchesData[index]
+    }))
 
-  matches_data.value = allMatchesData
+    matches_data.value = allMatchesData
+  } catch(error){
+    console.error("Erreur", error)
+  } finally{
+    loading.value = false
+  }
 }
 </script>
 
@@ -147,6 +170,9 @@ async function handleSubmit(e) {
         <button type="submit" class="bg-transparent hover:bg-gray-300 hover:text-gray-800 py-2 px-4 border rounded-2xl">Search</button>
       </div>
     </form>
+    <div v-if="loading" class="w-full h-2 bg-gray-700 rounded overflow-hidden">
+      <div class="h-full bg-blue-500 animate-pulse w-full"></div>
+    </div>
     <br>
     <!-- Matches Data Section -->
     <div class="w-full y space-y-8" v-if="matches_data.length> 0">
