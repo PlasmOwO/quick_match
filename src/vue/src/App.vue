@@ -178,8 +178,8 @@ async function handleSubmit(e) {
       Export page
     </button>
   </div>
-    <div class="container flex flex-col gap-4 max-w-1/2 m-auto py-6">
-      <h1 class="text-center font-sans text-4xl font-bold">Quick Match</h1>
+    <div class="container flex flex-col gap-4 w-full md:max-w-1/2 px-4 md:px-0 m-auto py-6">
+      <h1 class="text-center font-sans text-2xl md:text-4xl font-bold">Quick Match</h1>
       <hr>
     <br>
     <form class="bg-gray-900 rounded w-full mx-auto flex flex-col gap-4"  @submit="handleSubmit">
@@ -201,33 +201,33 @@ async function handleSubmit(e) {
         <!-- Match Result Header -->
         <p class="text-stone-300 font-mono">{{match?.date}}</p>
 
-        <h2 class="text-3xl font-bold mb-8 text-center" :class="match.details?.win === false ? 'text-red-500' : 'text-green-500'">
+        <h2 class="text-xl md:text-3xl font-bold mb-8 text-center" :class="match.details?.win === false ? 'text-red-500' : 'text-green-500'">
           {{ match.details?.win === false ? 'Defeat' : 'Victory'}}
         </h2>
 
         
         <!-- Main Grid: Left Team | Stats | Right Team -->
-        <div class="grid grid-cols-3 gap-0.1">
+        <div class="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-6">
           
           <!-- LEFT SIDE: Blue Team -->
-          <div class="flex flex-col gap-6">
+          <div class="flex flex-col gap-2 md:gap-6">
             <div
               v-for="(championName, pIndex) in match.details?.blue_champions?.name || []"
               :key="`blue-${pIndex}`"
               class="flex items-center justify-between gap-4"
             >
-              <div class="flex items-center gap-3 flex-1">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
                 <!-- Avatar -->
-                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
+                <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
                   <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.blue_champions?.id?.[pIndex]}.png`">
                 </div>
 
                 <!-- Texte -->
-                <div class="flex flex-col">
-                  <span class="font-semibold" :class="match.details.blue_names[pIndex] ===player_name ? 'text-green-300' : 'text-blue-400'">
+                <div class="flex flex-col min-w-0">
+                  <span class="font-semibold truncate" :class="match.details.blue_names[pIndex] ===player_name ? 'text-green-300' : 'text-blue-400'">
                     {{ match.details.blue_names[pIndex] }}
                   </span>
-                  <span class="text-gray-400 text-sm">
+                  <span class="text-gray-400 text-sm truncate">
                     {{ championName }}
                   </span>
                 </div>
@@ -236,9 +236,9 @@ async function handleSubmit(e) {
           </div>
 
           <!-- CENTER: Stats -->
-          <div class="flex flex-col gap-6">
+          <div class="hidden md:flex flex-col gap-2 md:gap-6">
           <!-- Headers -->
-          <div class="grid grid-cols-4 gap-4 text-center border-b border-gray-600 pb-4">
+          <div class="grid grid-cols-4 text-[10px] md:text-sm gap-1 md:gap-4 text-center border-b border-gray-600 pb-2 md:pb-4">
             <div class="text-gray-400 text-sm font-semibold">GOLD %</div>
             <div class="text-gray-400 text-sm font-semibold">DMG %</div>
             <div class="text-gray-400 text-sm font-semibold">DMG %</div>
@@ -249,7 +249,7 @@ async function handleSubmit(e) {
           <div
             v-for="(dmg, pIndex) in match.dmg?.blue_dmg_percentages || []"
             :key="`blue-stats-${pIndex}`"
-            class="grid grid-cols-4 gap-4 text-center items-center"
+            class="grid grid-cols-4 gap-2 md:gap-4 text-[10px] md:text-base text-center items-center"
           >
             <!-- Gold % blue -->
             <div  :class="Math.max(...match.gold?.blue_gold_percentages) == match.gold?.blue_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
@@ -274,19 +274,19 @@ async function handleSubmit(e) {
         </div>
 
           <!-- RIGHT SIDE: Red Team (Mirrored) -->
-          <div class="flex flex-col gap-6">
+          <div class="flex flex-col gap-2 md:gap-6">
             <div
               v-for="(championName, pIndex) in match.details?.red_champions?.name || []"
               :key="`red-${pIndex}`"
               class="flex items-center justify-between gap-4"
             >
 
-              <div class="flex items-center gap-3 flex-1 justify-end">
-                <div class="flex flex-col text-right">
-                  <span class="font-semibold" :class="match.details.red_names[pIndex] === player_name ? 'text-green-300' : 'text-red-400'">{{ match.details?.red_names[pIndex] }}</span>
-                  <span class="text-gray-400 text-sm">{{ championName }}</span>
+              <div class="flex items-center gap-3 flex-1 min-w-0 justify-end">
+                <div class="flex flex-col text-right min-w-0">
+                  <span class="font-semibold truncate" :class="match.details.red_names[pIndex] === player_name ? 'text-green-300' : 'text-red-400'">{{ match.details?.red_names[pIndex] }}</span>
+                  <span class="text-gray-400 text-sm truncate">{{ championName }}</span>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-xs">
+                <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-xs">
                   <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.red_champions?.id?.[pIndex]}.png`">
                 </div>
               </div>
@@ -299,7 +299,7 @@ async function handleSubmit(e) {
         <!-- Bans Section -->
         <div class="grid grid-cols-3 gap-8 mt-8">
           <!-- Left Items -->
-          <div class="flex justify-start gap-2">
+          <div class="flex justify-start gap-2 flex-wrap">
             <div v-for="(ban, i) in match.details?.blue_bans?.id" :key="`left-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600">
               <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
             </div>
@@ -307,7 +307,7 @@ async function handleSubmit(e) {
           <!-- Center spacer -->
           <div></div>
           <!-- Right Items -->
-          <div class="flex justify-end gap-2">
+          <div class="flex justify-end gap-2 flex-wrap">
             <div v-for="(ban, i) in [...(match.details?.red_bans?.id)].reverse()" :key="`right-item-${i}`" class="w-8 h-8 bg-gray-700 rounded border border-gray-600">
               <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${ban}.png`" @error="e =>e.target.src = `/missing_ban.jpg`">
             </div>
