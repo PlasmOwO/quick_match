@@ -201,7 +201,7 @@ async function handleSubmit(e) {
         <!-- Match Result Header -->
         <p class="text-stone-300 font-mono">{{match?.date}}</p>
 
-        <h2 class="text-xl md:text-3xl font-bold mb-8 text-center" :class="match.details?.win === false ? 'text-red-500' : 'text-green-500'">
+        <h2 class="text-xl md:text-3xl font-bold mb-8 text-center font-sans" :class="match.details?.win === false ? 'text-violet-200' : 'text-green-500'">
           {{ match.details?.win === false ? 'Defeat' : 'Victory'}}
         </h2>
 
