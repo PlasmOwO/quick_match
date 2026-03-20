@@ -236,42 +236,45 @@ async function handleSubmit(e) {
           </div>
 
           <!-- CENTER: Stats -->
-          <div class="hidden md:flex flex-col gap-2 md:gap-6">
-          <!-- Headers -->
-          <div class="grid grid-cols-4 text-[10px] md:text-sm gap-1 md:gap-4 text-center border-b border-gray-600 pb-2 md:pb-4">
-            <div class="text-gray-400 text-sm font-semibold">GOLD %</div>
-            <div class="text-gray-400 text-sm font-semibold">DMG %</div>
-            <div class="text-gray-400 text-sm font-semibold">DMG %</div>
-            <div class="text-gray-400 text-sm font-semibold">GOLD %</div>
+          <div class="hidden md:flex flex-col">
+
+            <!-- Headers (séparés visuellement) -->
+            <div class="grid grid-cols-4 text-sm text-center border-b border-gray-600 pb-1 mb-2 -mt-6">
+              <div class="text-gray-400 font-semibold">GOLD %</div>
+              <div class="text-gray-400 font-semibold">DMG %</div>
+              <div class="text-gray-400 font-semibold">DMG %</div>
+              <div class="text-gray-400 font-semibold">GOLD %</div>
+            </div>
+
+            <!-- Stats alignées avec joueurs -->
+            <div class="flex flex-col gap-2 md:gap-8">
+              <div
+                v-for="(dmg, pIndex) in match.dmg?.blue_dmg_percentages || []"
+                :key="`blue-stats-${pIndex}`"
+                class="grid grid-cols-4 text-center items-center h-12 md:h-10"
+              >
+                <!-- Gold % blue -->
+                <div :class="Math.max(...match.gold?.blue_gold_percentages) == match.gold?.blue_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
+                  {{ match.gold?.blue_gold_percentages?.[pIndex]?.toFixed(2) || '0' }}
+                </div>
+
+                <!-- Dmg % blue -->
+                <div :class="Math.max(...match.dmg?.blue_dmg_percentages) == dmg ? 'text-amber-300 font-bold' : 'text-white'">
+                  {{ dmg?.toFixed(2) || '0' }}
+                </div>
+
+                <!-- Dmg % red -->
+                <div :class="Math.max(...match.dmg?.red_dmg_percentages) == match.dmg?.red_dmg_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
+                  {{ match.dmg?.red_dmg_percentages?.[pIndex]?.toFixed(2) || '0' }}
+                </div>
+
+                <!-- Gold % red -->
+                <div :class="Math.max(...match.gold?.red_gold_percentages) == match.gold?.red_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
+                  {{ match.gold?.red_gold_percentages?.[pIndex]?.toFixed(2) || '0' }}
+                </div>
+              </div>
+            </div>
           </div>
-
-          <!-- Player Stats for BLUE team -->
-          <div
-            v-for="(dmg, pIndex) in match.dmg?.blue_dmg_percentages || []"
-            :key="`blue-stats-${pIndex}`"
-            class="grid grid-cols-4 gap-2 md:gap-4 text-[10px] md:text-base text-center items-center"
-          >
-            <!-- Gold % blue -->
-            <div  :class="Math.max(...match.gold?.blue_gold_percentages) == match.gold?.blue_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
-              {{ match.gold?.blue_gold_percentages?.[pIndex]?.toFixed(2) || '0' }}
-            </div>
-
-            <!-- Dmg % blue -->
-            <div :class="Math.max(...match.dmg?.blue_dmg_percentages) == dmg ? 'text-amber-300 font-bold' : 'text-white'">
-              {{ dmg?.toFixed(2) || '0' }}
-            </div>
-
-            <!-- Dmg % red -->
-            <div :class="Math.max(...match.dmg?.red_dmg_percentages) == match.dmg?.red_dmg_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
-              {{ match.dmg?.red_dmg_percentages?.[pIndex]?.toFixed(2) || '0' }}
-            </div>
-
-            <!-- Gold % red -->
-            <div :class="Math.max(...match.gold?.red_gold_percentages) == match.gold?.red_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
-              {{ match.gold?.red_gold_percentages?.[pIndex]?.toFixed(2) || '0' }}
-            </div>
-          </div>
-        </div>
 
           <!-- RIGHT SIDE: Red Team (Mirrored) -->
           <div class="flex flex-col gap-2 md:gap-6">
