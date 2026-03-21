@@ -4,6 +4,7 @@ import DatePicker from 'primevue/datepicker';
 import { matchDate,getPuuid, listPlayerMatches, requestMatchData, initDDragonVersion, championIdToName, championImageFromName, getMatchChampions, computeGoldPercentByPlayer, computeDmgRatioByPlayer} from './utils/scripts.js'
 import { computed } from 'vue'
 import domtoimage from 'dom-to-image-more'
+import jsPDF from 'jspdf'
 const player_name = ref('')
 const player_tag = ref('')
 const player_puuid = ref('')
@@ -34,18 +35,65 @@ async function loadDDragonVersion() {
   ddragonVersion.value = version
   console.log("DDragon version loaded:", ddragonVersion.value)
 }
-const downloadPNG = async () => {
-  const node = document.getElementById('match-data')
+const downloadPDF = async () => {
+  const elements = document.querySelectorAll('.match-card')
+  if (!elements.length) return
 
-  const dataUrl = await domtoimage.toPng(node, {
-    scale: 2,
-    bgcolor: '#111827', // bg-gray-900 exact
+  // ✅ ACTIVER MODE EXPORT
+  document.body.classList.add('export-mode')
+
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'px',
+    format: 'a4'
   })
 
-  const link = document.createElement('a')
-  link.download = 'match-export.png'
-  link.href = dataUrl
-  link.click()
+  let first = true
+
+  try {
+    // ✅ attendre que tout soit bien rendu (images + fonts)
+    await document.fonts.ready
+
+    await Promise.all(
+      Array.from(document.images).map(img => {
+        if (img.complete) return Promise.resolve()
+        return new Promise(res => {
+          img.onload = img.onerror = res
+        })
+      })
+    )
+
+    for (let el of elements) {
+      el.scrollIntoView({ block: 'center' })
+
+      const dataUrl = await domtoimage.toPng(el, {
+        scale: 2,
+        bgcolor: '#111827'
+      })
+
+      const img = new Image()
+      img.src = dataUrl
+      await new Promise(res => (img.onload = res))
+
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (img.height * pdfWidth) / img.width
+
+      if (!first) pdf.addPage()
+
+      pdf.addImage(img, 'PNG', 0, 0, pdfWidth, pdfHeight)
+
+      first = false
+    }
+
+    // 👇 preview navigateur
+    const blob = pdf.output('blob')
+    const url = URL.createObjectURL(blob)
+    window.open(url)
+
+  } finally {
+    // ✅ TOUJOURS nettoyer (même si erreur)
+    document.body.classList.remove('export-mode')
+  }
 }
 loadDDragonVersion()
 
@@ -173,7 +221,7 @@ async function handleSubmit(e) {
   <section id="page-content" class="bg-gray-900 min-h-screen text-white flex items-center justify-center">
     <div class="absolute top-6 right-6">
     <button
-      @click="downloadPNG()"
+      @click="downloadPDF()"
       class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600">
       Export page
     </button>
@@ -197,7 +245,7 @@ async function handleSubmit(e) {
     <br>
     <!-- Matches Data Section -->
     <div id="match-data" class="w-full y space-y-8" v-if="matches_data.length> 0">
-      <div v-for="(match, index) in matches_data" :key="index" class="bg-gray-900 rounded-lg p-8 border border-gray-700">
+      <div v-for="(match, index) in matches_data" :key="index" class="match-card bg-gray-900 rounded-lg p-8 border border-gray-700">
         <!-- Match Result Header -->
         <p class="text-stone-300 font-mono">{{match?.date}}</p>
 

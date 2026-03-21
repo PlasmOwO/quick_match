@@ -15,6 +15,7 @@
         "npm:@tailwindcss/vite@^4.1.18",
         "npm:@vitejs/plugin-vue@^6.0.3",
         "npm:axios@^1.13.4",
+        "npm:dom-to-image-more@^3.7.2",
         "npm:netlify-cli@^23.15.1",
         "npm:primevue@^4.5.4",
         "npm:tailwindcss-primeui@~0.6.1",

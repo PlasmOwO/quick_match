@@ -84,3 +84,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.export-mode *,
+.export-mode *::before,
+.export-mode *::after {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* fix Tailwind */
+.export-mode * {
+  --tw-ring-shadow: none !important;
+  --tw-shadow: none !important;
+}
