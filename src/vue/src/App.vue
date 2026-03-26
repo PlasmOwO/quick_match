@@ -226,7 +226,7 @@ async function handleSubmit(e) {
       Export page
     </button>
   </div>
-    <div class="container flex flex-col gap-4 w-full md:max-w-1/2 px-4 md:px-0 m-auto py-6">
+    <div class="flex flex-col gap-4 w-full px-2 md:px-4 lg:max-w-4xl m-auto py-6">
       <h1 class="text-center font-sans text-2xl md:text-4xl font-bold">Quick Match</h1>
       <hr>
     <br>
@@ -267,7 +267,8 @@ async function handleSubmit(e) {
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <!-- Avatar -->
                 <div class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center">
-                  <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.blue_champions?.id?.[pIndex]}.png`">
+                  <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.blue_champions?.id?.[pIndex]}.png`"
+                  class="w-full h-full object-contain">
                 </div>
 
                 <!-- Texte -->
@@ -287,7 +288,7 @@ async function handleSubmit(e) {
           <div class="hidden md:flex flex-col">
 
             <!-- Headers (séparés visuellement) -->
-            <div class="grid grid-cols-4 text-sm text-center border-b border-gray-600 pb-1 mb-2 -mt-6">
+            <div class="grid grid-cols-4 text-sm md:text-xs lg:text-sm text-center border-b border-gray-600 pb-1 mb-2 -mt-6">
               <div class="text-gray-400 font-semibold">GOLD %</div>
               <div class="text-gray-400 font-semibold">DMG %</div>
               <div class="text-gray-400 font-semibold">DMG %</div>
@@ -295,11 +296,11 @@ async function handleSubmit(e) {
             </div>
 
             <!-- Stats alignées avec joueurs -->
-            <div class="flex flex-col gap-2 md:gap-8">
+            <div class="flex flex-col gap-2 md:gap-10 lg:gap-8">
               <div
                 v-for="(dmg, pIndex) in match.dmg?.blue_dmg_percentages || []"
                 :key="`blue-stats-${pIndex}`"
-                class="grid grid-cols-4 text-center items-center h-12 md:h-10"
+                class="grid grid-cols-4 text-center items-center h-12 md:h-10 text-sm md:text-xs lg:text-sm"
               >
                 <!-- Gold % blue -->
                 <div :class="Math.max(...match.gold?.blue_gold_percentages) == match.gold?.blue_gold_percentages?.[pIndex] ? 'text-amber-300 font-bold' : 'text-white'">
@@ -338,7 +339,8 @@ async function handleSubmit(e) {
                   <span class="text-gray-400 text-sm truncate">{{ championName }}</span>
                 </div>
                 <div class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center">
-                  <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.red_champions?.id?.[pIndex]}.png`">
+                  <img v-if="ddragonVersion" :src="`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${match.details?.red_champions?.id?.[pIndex]}.png`"
+                  class="w-full h-full object-contain">
                 </div>
               </div>
             
